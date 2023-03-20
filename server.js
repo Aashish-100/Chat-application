@@ -131,6 +131,22 @@ io.on('connection', socket=> {
             socket.broadcast.to(getuser.room).emit('update',`${getuser.username} left the conversation`);
         }
     });
+
+    //File sharing
+    socket.on("file-meta", function(data){
+        const getuser=getCurrentUser(socket.id);
+        socket.to(getuser.room).emit("fs-meta",data.metadata);
+    });
+
+    socket.on("fs-start", function(data){
+        const getuser=getCurrentUser(socket.id);
+        socket.to(getuser.room).emit("fs-share",{});
+    });
+    
+    socket.on("file-raw", function(data){
+        const getuser=getCurrentUser(socket.id);
+        socket.to(getuser.room).emit("fs-share",data.buffer);
+    });
     
 })
 

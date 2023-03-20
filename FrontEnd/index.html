@@ -91,7 +91,8 @@
                             <div class="input-group inp">
                                 <button class="btn emoji" type="button" id="button-emoji"><i class="far fa-smile"></i></button>
                                 <input type="text" id="msg-input" placeholder="Enter Message" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                <button class="btn attach" type="button" id="button-attachfiles"><i class="fas fa-paperclip"></i></button>
+                                <input type="file" id="attach-file" multiple hidden>
+                                <label for="attach-file" class="btn attach" id="button-attachfiles"><i class="fas fa-paperclip"></i>
                             </div>
                             <div class="send-btn">
                                 <button type="submit" id="send-msg" class="sendbtn"><i class="fas fa-chevron-circle-right fa-lg"></i></button>
@@ -100,11 +101,11 @@
                     </form>
                 </div>
             </div>
-            <div class="uploadbar">
+            <!-- <div class="uploadbar">
                 <h2>Uploading: Your files are being end-to-end encrypted</h2>
                 <h2>Progress:0%</h2>
                 <h2>ABC.txt</h2>
-            </div>
+            </div> -->
         </div>
     </body>
     <script src="/socket.io/socket.io.js"></script>

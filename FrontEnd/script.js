@@ -63,7 +63,7 @@ window.onload = function(){
         var sendmsgbtn=document.getElementById("send-msg");
         var emojibtn=document.getElementById("button-emoji");
         var inpmsg=document.getElementById("msg-input");
-        var attachfiles=document.getElementById("button-attachfiles");
+        var attachfiles=document.getElementById("attach-file");
         var chatscreen = document.getElementById("chatscrn");
         var roomkeydisplay = document.getElementById("display-rk");
         var msgf=document.getElementById("msgform");
@@ -105,6 +105,12 @@ window.onload = function(){
                 text: msg,
                 time: time
             });
+
+            shareFile({
+                filename:file.name,
+                total_buffer_size:buffer.length,
+                buffer_size:1024
+            },buffer,el.querySelector(".progress"));
 
             socket.emit('chat',{
                 username: usn,
@@ -151,12 +157,58 @@ window.onload = function(){
         });
 
 
-        attachfiles.addEventListener("click",()=>{
-            chatscreen.classList.remove("active")
-            
-        })
+        attachfiles.addEventListener("change",(e)=>{
+            let file=e.target.files[0];
+            if(!file){
+                return;
+            }
+            let reader=new FileReader();
+            reader.onload=function(e){
+                let buffer = new Uint8Array(reader.result);
+                let el =document.createElement("div");
+                el.classList.add("progressdiv");
+                el.innerHTML=  `
+                <div class="progress">0%</div>
+                <div class="filename>${file.name}</div>
+                `;
+                // shareFile({
+                //     filename:file.name,
+                //     total_buffer_size:buffer.length,
+                //     buffer_size:1024
+                // },buffer,el.querySelector(".progress"));
+            }
+            reader.readAsArrayBuffer(file);
+        });
 
-    })  
+        function shareFile(type,metadata,buffer,progress_node){
+            if(type=="my"){
+                //If type is mine, we will emit the file
+                socket.emit("file-meta",{
+                metadata:metadata
+                });
+            }
+            else if(type=="other"){
+                //do something
+            }
+            else if(type==update){
+                //do something
+            }
+            // socket.emit("file-meta",{
+            //     metadata:metadata
+            // });
+            // socket.on("fs-share",function(){
+            //     let chunk=buffer.slice(0,metadata.buffer_size);
+            //     buffer=buffer.slice(metadata.buffer_size,buffer.length);
+            //     progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size*100)+"%");
+            //     if(chunk.length!=0){
+            //         socket.emit("file-raw",{
+            //             buffer:chunk
+            //         });
+            //     }
+            // });
+        }
+
+    })  ;
 }
 
 // // var usn,rk=getVals();
