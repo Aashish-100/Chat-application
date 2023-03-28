@@ -89,6 +89,35 @@ window.onload = function(){
             navigator.clipboard.writeText(rk);
             alert("Copied!");
         }
+
+
+        var file;
+        var fileSelected = false;
+        attachfiles.addEventListener("change",(e)=>{
+            file=e.target.files[0];
+            // if(!file){
+            //     return;
+            // }
+            inpmsg.value="Attached: "+file.name;
+            inpmsg.readOnly = true;
+            fileSelected=true;
+            // let reader=new FileReader();
+            // reader.onload=function(e){
+            //     let buffer = new Uint8Array(reader.result);
+            //     let el =document.createElement("div");
+            //     el.classList.add("progressdiv");
+            //     el.innerHTML=  `
+            //     <div class="progress">0%</div>
+            //     <div class="filename>${file.name}</div>
+            //     `;
+            //     // shareFile({
+            //     //     filename:file.name,
+            //     //     total_buffer_size:buffer.length,
+            //     //     buffer_size:1024
+            //     // },buffer,el.querySelector(".progress"));
+            // }
+            // reader.readAsArrayBuffer(file);
+        });
     
         //Reading message from the user and displaying it 
         msgf.addEventListener('submit', function(e){
@@ -97,28 +126,65 @@ window.onload = function(){
             var hrs=getval.getHours();
             var mins=getval.getMinutes();
             var time=hrs + ":" + mins;
-            var msg=inpmsg.value;
-            //Emit a message to a server
 
-            renderMessage("my",{
-                username: usn,
-                text: msg,
-                time: time
-            });
+            if(fileSelected)
+            {
+                let reader=new FileReader();
+                reader.onload=function(e){
+                    let buffer = new Uint8Array(reader.result);
+                    // let el =document.createElement("div");
+                    // el.classList.add("progressdiv");
+                    inpmsg.innerHTML+= '<div class="progress">0%</div>'  
+                    // el.innerHTML= `
+                    // <div class="progress">0%</div>
+                    // <div class="filename>${file.name}</div>
+                    // `;
 
-            shareFile({
-                filename:file.name,
-                total_buffer_size:buffer.length,
-                buffer_size:1024
-            },buffer,el.querySelector(".progress"));
+                    //shareFile(type,metadata,buffer,progressnode)
+                    var msg=file.name;
+                    renderMessage("my",{
+                        username: usn,
+                        text: msg,
+                        time: time
+                    });
 
-            socket.emit('chat',{
-                username: usn,
-                text: msg,
-                time: time
-            });
-            msgf.reset();
-            // e.target.elements.
+                    shareFile({
+                        usender:usn,
+                        time:time,
+                        filename:file.name,
+                        total_buffer_size:buffer.length,
+                        buffer_size:1024
+                    },buffer,inpmsg.querySelector(".progress"));
+                }
+                reader.readAsArrayBuffer(file);
+                msgf.reset();
+                inpmsg.readOnly = false;
+                fileSelected=false;
+            }
+            else{
+                var msg=inpmsg.value;
+                //Emit a message to a server
+
+                renderMessage("my",{
+                    username: usn,
+                    text: msg,
+                    time: time
+                });
+
+                // shareFile({
+                //     filename:file.name,
+                //     total_buffer_size:buffer.length,
+                //     buffer_size:1024
+                // },buffer,el.querySelector(".progress"));
+
+                socket.emit('chat',{
+                    username: usn,
+                    text: msg,
+                    time: time
+                });
+                msgf.reset();
+                // e.target.elements.
+            }
 
         });
         function renderMessage(type,message){
@@ -150,62 +216,104 @@ window.onload = function(){
             renderMessage("other",message);
         });
 
+        // socket.on("fs-show",function(message){
+        //     renderMessage("other",message);
+        //     console.log("From fs-show");
+        //     fileShare={};
+        // });
+
+        var fileShare={};
+        socket.on("fs-meta",function(metadata){
+            fileShare.metadata=metadata.meta;
+            fileShare.transmitted=0;
+            fileShare.sender=metadata.senderid;
+            fileShare.buffer=[];
+            socket.emit("fs-start",
+            {
+                sender:metadata.senderid
+            })
+        });
+
+        socket.on("fs-share-r",function(buffer){
+            fileShare.buffer.push(buffer);
+            fileShare.transmitted += buffer.byteLength;
+            console.log(fileShare.transmitted);
+            if(fileShare.transmitted==fileShare.metadata.total_buffer_size){
+                console.log("Receiver received the complete file");
+                var getval=new Date;
+                var hrs=getval.getHours();
+                var mins=getval.getMinutes();
+                var time=hrs + ":" + mins;
+                // socket.emit("fs-rcomplete",
+                // {
+                //     sender:fileShare.sender,
+                //     metadata:fileShare.metadata
+                // }
+                renderMessage("other",
+                {
+                    username: fileShare.metadata.usender,
+                    text: fileShare.metadata.filename,
+                    time: time
+                });
+                saveFile(new Blob(fileShare.buffer), fileShare.metadata.filename);
+                fileShare={}
+            }else{
+                socket.emit("fs-start", {
+                    sender:fileShare.sender
+                })
+            }
+        });
+
 
         exitBtnRoom.addEventListener('click',function(){
             socket.emit('exituser',usn);
             window.location.href=window.location.href;
         });
 
+        function saveFile(blob, filename) {
+            if (window.navigator.msSaveOrOpenBlob) {
+              window.navigator.msSaveOrOpenBlob(blob, filename);
+            } else {
+              const a = document.createElement('a');
+              document.body.appendChild(a);
+              const url = window.URL.createObjectURL(blob);
+              a.href = url;
+              a.download = filename;
+              a.click();
+              setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+              }, 0)
+            }
+          }
 
-        attachfiles.addEventListener("change",(e)=>{
-            let file=e.target.files[0];
-            if(!file){
-                return;
-            }
-            let reader=new FileReader();
-            reader.onload=function(e){
-                let buffer = new Uint8Array(reader.result);
-                let el =document.createElement("div");
-                el.classList.add("progressdiv");
-                el.innerHTML=  `
-                <div class="progress">0%</div>
-                <div class="filename>${file.name}</div>
-                `;
-                // shareFile({
-                //     filename:file.name,
-                //     total_buffer_size:buffer.length,
-                //     buffer_size:1024
-                // },buffer,el.querySelector(".progress"));
-            }
-            reader.readAsArrayBuffer(file);
-        });
-
-        function shareFile(type,metadata,buffer,progress_node){
-            if(type=="my"){
-                //If type is mine, we will emit the file
-                socket.emit("file-meta",{
-                metadata:metadata
-                });
-            }
-            else if(type=="other"){
-                //do something
-            }
-            else if(type==update){
-                //do something
-            }
-            // socket.emit("file-meta",{
+        function shareFile(metadata,buffer,progress_node){
+            // if(type=="my"){
+            //     //If type is mine, we will emit the file
+            //     socket.emit("file-meta",{
             //     metadata:metadata
-            // });
-            // socket.on("fs-share",function(){
-            //     let chunk=buffer.slice(0,metadata.buffer_size);
-            //     buffer=buffer.slice(metadata.buffer_size,buffer.length);
-            //     progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size*100)+"%");
-            //     if(chunk.length!=0){
-            //         socket.emit("file-raw",{
-            //             buffer:chunk
-            //         });
-            //     }
-            // });
+            //     });
+            // }
+            // else if(type=="other"){
+            //     //do something
+            // }
+            // else if(type==update){
+            //     //do something
+            // }
+            socket.emit("file-meta",{
+                metadata:metadata
+            });
+            socket.on("fs-share-s",function(receiver){
+                let chunk=buffer.slice(0,metadata.buffer_size);
+                buffer=buffer.slice(metadata.buffer_size,buffer.length);
+                progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size*100)+"%");
+                if(chunk.length!=0){
+                    socket.emit("file-raw",{
+                        receiver:receiver.receiverid,
+                        buffer:chunk
+                    });
+                }
+            });
         }
 
     })  ;

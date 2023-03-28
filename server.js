@@ -135,18 +135,35 @@ io.on('connection', socket=> {
     //File sharing
     socket.on("file-meta", function(data){
         const getuser=getCurrentUser(socket.id);
-        socket.to(getuser.room).emit("fs-meta",data.metadata);
+        socket.broadcast.to(getuser.room).emit("fs-meta",{
+            senderid:socket.id,
+            meta:data.metadata
+        });
     });
 
     socket.on("fs-start", function(data){
-        const getuser=getCurrentUser(socket.id);
-        socket.to(getuser.room).emit("fs-share",{});
+        // const getuser=getCurrentUser(socket.id);
+        socket.to(data.sender).emit("fs-share-s",
+        {
+            receiverid:socket.id
+        });
     });
     
     socket.on("file-raw", function(data){
         const getuser=getCurrentUser(socket.id);
-        socket.to(getuser.room).emit("fs-share",data.buffer);
+        socket.broadcast.to(getuser.room).emit("fs-share-r",data.buffer);
     });
+
+
+    // socket.on("fs-rcomplete", function(data){
+    //     const getuser=getCurrentUser(socket.id);
+    //     socket.broadcast.to(getuser.room).emit("fs-show",
+    //     {
+    //         username: data.metadata.usender,
+    //         text: data.metadata.filename,
+    //         time: data.metadata.time
+    //     });
+    // })
     
 })
 
