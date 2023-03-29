@@ -11,7 +11,7 @@ const { get } = require("https");
 const server=http.createServer(app);
 const io=socketio(server);
 
-
+const config = require('./config.js');
 
 const users=[];
 
@@ -48,6 +48,9 @@ function getRoomUsers(room){
 
 //Set static folder
 app.use(express.static(path.join(__dirname, 'FrontEnd'))); //Connect script to server
+app.get('*', function (req, res) { // The 404 Route (ALWAYS Keep this as the last route)
+    res.redirect(config.webserver.splash);
+});
 
 //Accept URL Parameters
 // app.use(express.urlencoded({extended: true}))
@@ -167,7 +170,7 @@ io.on('connection', socket=> {
     
 })
 
-const port=3000;
-server.listen(port,()=>{
-    console.log("Server running on 3000!");
+//const port=3000;
+server.listen(config.webserver.port, config.webserver.host, () => {
+    console.log('listening on *:' + config.webserver.port);
 });
