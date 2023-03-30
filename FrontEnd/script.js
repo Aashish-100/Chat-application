@@ -50,16 +50,21 @@ window.onload = function(){
     var joinchatroombtn=document.getElementById("joinroom");
     var joinchat = document.getElementById("joinchatscreen");
     var frmres=document.getElementById("usrinp");
-    // usrinp.addEventListener("keyup", ({key}) => {
-    //     if (key === "Enter") {
-    //         // Do work
-    //     }
-    // })
+    usrinp.addEventListener("keyup", function(e){
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            joinchatroombtn.click();
+        }
+    });
     joinchatroombtn.addEventListener("click", function(){
-        usn = username.value;
-        rk = roomkey.value;
-        if (usn.length ==0){
+        usn = username.value.trim();
+        rk = roomkey.value.trim();
+
+        if (usn.length==0){
             alert("Please enter a valid username")
+            return;
+        }
+        if (rk.length==0){
+            alert("Please enter a valid room key")
             return;
         }
         // Join Room
@@ -74,7 +79,7 @@ window.onload = function(){
         var msgf=document.getElementById("msgform");
         joinchat.classList.remove("active");
         chatscreen.classList.add("active");
-        var cred={usnm: username.value, rmk: roomkey.value};
+        var cred={usnm: usn, rmk: rk};
         socket.emit('joinRoom', cred);
         // console.log(usn, rk);
         roomkeydisplay.innerHTML = "Room Key: "+"<span class='blurry-text' id='roomk'>"+rk+"</span>"+" <button class='copbutton' id='cpbtn'><i class='fas fa-copy'></i></button>";
@@ -128,8 +133,13 @@ window.onload = function(){
         msgf.addEventListener('submit', function(e){
             e.preventDefault();
             var getval=new Date;
+            //formatting time as hh:mm
             var hrs=getval.getHours();
+            if(hrs<10)
+                hrs="0"+hrs;
             var mins=getval.getMinutes();
+            if(mins<10)
+                mins="0"+mins;
             var time=hrs + ":" + mins;
 
             if(fileSelected)
@@ -251,7 +261,11 @@ window.onload = function(){
                 console.log("Receiver received the complete file");
                 var getval=new Date;
                 var hrs=getval.getHours();
+                if(hrs<10)
+                    hrs="0"+hrs;
                 var mins=getval.getMinutes();
+                if(mins<10)
+                    mins="0"+mins;
                 var time=hrs + ":" + mins;
                 // socket.emit("fs-rcomplete",
                 // {
