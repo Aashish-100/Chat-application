@@ -50,6 +50,11 @@ window.onload = function(){
     var joinchatroombtn=document.getElementById("joinroom");
     var joinchat = document.getElementById("joinchatscreen");
     var frmres=document.getElementById("usrinp");
+    // usrinp.addEventListener("keyup", ({key}) => {
+    //     if (key === "Enter") {
+    //         // Do work
+    //     }
+    // })
     joinchatroombtn.addEventListener("click", function(){
         usn = username.value;
         rk = roomkey.value;
@@ -134,19 +139,19 @@ window.onload = function(){
                     let buffer = new Uint8Array(reader.result);
                     // let el =document.createElement("div");
                     // el.classList.add("progressdiv");
-                    inpmsg.innerHTML+= '<div class="progress">0%</div>'  
+                    inpmsg.value = "0% sent :- "+file.name;
                     // el.innerHTML= `
                     // <div class="progress">0%</div>
-                    // <div class="filename>${file.name}</div>
+                    // <div class="filename">${file.name}</div>
                     // `;
 
                     //shareFile(type,metadata,buffer,progressnode)
-                    var msg=file.name;
-                    renderMessage("my",{
-                        username: usn,
-                        text: msg,
-                        time: time
-                    });
+                    // var msg=file.name;
+                    // renderMessage("my",{
+                    //     username: usn,
+                    //     text: msg,
+                    //     time: time
+                    // });
 
                     shareFile({
                         usender:usn,
@@ -154,36 +159,40 @@ window.onload = function(){
                         filename:file.name,
                         total_buffer_size:buffer.length,
                         buffer_size:1024
-                    },buffer,inpmsg.querySelector(".progress"));
+                    },buffer);
+                    //},buffer,inpmsg.querySelector(".progress"));
                 }
                 reader.readAsArrayBuffer(file);
-                msgf.reset();
                 inpmsg.readOnly = false;
                 fileSelected=false;
+                msgf.reset();
             }
             else{
                 var msg=inpmsg.value;
-                //Emit a message to a server
+                msg = msg.trim();
+                if(msg!=""){
+                    //Emit a message to a server
 
-                renderMessage("my",{
-                    username: usn,
-                    text: msg,
-                    time: time
-                });
+                    renderMessage("my",{
+                        username: usn,
+                        text: msg,
+                        time: time
+                    });
 
-                // shareFile({
-                //     filename:file.name,
-                //     total_buffer_size:buffer.length,
-                //     buffer_size:1024
-                // },buffer,el.querySelector(".progress"));
+                    // shareFile({
+                    //     filename:file.name,
+                    //     total_buffer_size:buffer.length,
+                    //     buffer_size:1024
+                    // },buffer,el.querySelector(".progress"));
 
-                socket.emit('chat',{
-                    username: usn,
-                    text: msg,
-                    time: time
-                });
-                msgf.reset();
-                // e.target.elements.
+                    socket.emit('chat',{
+                        username: usn,
+                        text: msg,
+                        time: time
+                    });
+                    msgf.reset();
+                    // e.target.elements.
+                }
             }
 
         });
@@ -287,27 +296,29 @@ window.onload = function(){
             }
           }
 
-        function shareFile(metadata,buffer,progress_node){
-            // if(type=="my"){
-            //     //If type is mine, we will emit the file
-            //     socket.emit("file-meta",{
-            //     metadata:metadata
-            //     });
-            // }
-            // else if(type=="other"){
-            //     //do something
-            // }
-            // else if(type==update){
-            //     //do something
-            // }
+        //function shareFile(metadata,buffer,progress_node){
+        function shareFile(metadata,buffer){
             socket.emit("file-meta",{
                 metadata:metadata
             });
             socket.on("fs-share-s",function(receiver){
                 let chunk=buffer.slice(0,metadata.buffer_size);
                 buffer=buffer.slice(metadata.buffer_size,buffer.length);
-                progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size*100)+"%");
+                //progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size)*100+"%");
+                inpmsg.value=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size)*100)+"% sent :- "+metadata.filename;
                 if(chunk.length!=0){
+                    //displaying message when last buffer sent
+                    if(chunk.length<metadata.buffer_size)
+                    {
+                        inpmsg.value="100% sent :- "+metadata.filename;
+                        let msg = metadata.filename;
+                        inpmsg.value="";
+                        renderMessage("my",{
+                            username: usn,
+                            text: msg,
+                            time: metadata.time
+                        });
+                    }
                     socket.emit("file-raw",{
                         receiver:receiver.receiverid,
                         buffer:chunk
@@ -315,34 +326,5 @@ window.onload = function(){
                 }
             });
         }
-
-    })  ;
+    });
 }
-
-// // var usn,rk=getVals();
-
-// // chatscreen.onload=function(){
-// //     console.log(usn,rk);
-// // }
-
-//1. Join room
-
-
-
-
-
-// chatscreen.onload=function(){
-//     roomkeydisplay.innerText = "Room Key: "+rkey;
-// }
-
-// joinchat.addEventListener("load",function(){
-//     var username=document.getElementById("username"); //Gets the tag
-//     var roomkey=document.getElementById("roomkey"); //Gets the tag
-//     var frmres=document.getElementById("usrinp");
-//     var usn,rk;
-//     frmres.onsubmit=function(){
-//         usn=username.value;
-//         rk=roomkey.value;
-//     }
-//     console.log(usn,rk);
-// });
