@@ -13,6 +13,12 @@
     overflow: auto;
 }
 
+#generateRKbut{
+    background: none;
+    outline: none;
+    border: none;
+}
+
 .rk{
     color: black;
     font-family: 'Inter', sans-serif;
