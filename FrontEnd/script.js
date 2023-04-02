@@ -7898,7 +7898,7 @@ function randomUID(length) {
 
 
 
-var usn,rk,rrk="",msgdiv;
+var usn,rk,rusn="",rrk="",msgdiv;
 window.onload = function(){
     // socket.on('message',message => {
     //     console.log(message);
@@ -7918,29 +7918,71 @@ window.onload = function(){
     // var roomkey=document.getElementById("roomkey");
     var joinchatroombtn=document.getElementById("joinroom");
     var joinchat = document.getElementById("joinchatscreen");
+    var uinp = document.getElementById("usrinp");
+    var randomunbut = document.getElementById("generateUNbut");
     var randomrkbut = document.getElementById("generateRKbut");
-    randomrkbut.onclick = function(){
+    randomunbut.addEventListener("mouseup", function()
+    {
+        rusn = randomUsername(2);
+        console.log(rusn);
+        //console.log(typeof rrk);
+        username.value=rusn;
+        username.focus();
+    });
+    randomunbut.addEventListener("keyup", function(e)
+    {
         //alert("Clicked");
-        let rrk = getWordNum(6);
+        if(e.key==='Enter')
+        {
+            rusn = randomUsername(2);
+            console.log(rusn);
+            //console.log(typeof rrk);
+            username.value=rusn;
+            username.focus(); //remove selection from button
+            e.stopPropagation(); //to not trigger Enter on form
+        }
+    });
+    randomrkbut.addEventListener("mouseup", function()
+    {
+        rrk = getWordNum(6);
         console.log(rrk);
-        //roomkey.value=rrk;
-    }
-    var frmres=document.getElementById("usrinp");
-    usrinp.addEventListener("keyup", function(e){
-        if (e.key === 'Enter' || e.keyCode === 13) {
+        //console.log(typeof rrk);
+        roomkey.value=rrk;
+        roomkey.focus();
+    });
+    randomrkbut.addEventListener("keyup", function(e)
+    {
+        //alert("Clicked");
+        if(e.key==='Enter')
+        {
+            rrk = getWordNum(6);
+            console.log(rrk);
+            //console.log(typeof rrk);
+            roomkey.value=rrk;
+            roomkey.focus(); //remove selection from button
+            e.stopPropagation(); //to not trigger Enter on form
+        }
+    });
+    // var frmres=document.getElementById("usrinp");
+    uinp.addEventListener("keyup", function(e){
+        if (e.key === 'Enter') {
+            //console.log("Enter key event");
             joinchatroombtn.click();
         }
     });
     joinchatroombtn.addEventListener("click", function(){
         usn = username.value.trim();
-        if(rrk!="")
-        {
-            rk=rrk;
-        }
-        else{
-            rk = roomkey.value.trim();
-        }
-
+        rk = roomkey.value.trim();
+        // if(rrk!="")
+        // {
+        //     rk=rrk;
+        // }
+        // else{
+        //     rk = roomkey.value.trim();
+        // }
+        // console.log(rk);
+        // console.log(typeof rk);
+        // console.log(typeof usn);
         if (usn.length==0){
             alert("Please enter a valid username")
             return;

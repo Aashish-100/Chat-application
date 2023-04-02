@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Chat anonymously and securely with disposable encrypted rooms.">
         <title>Aatmanitbhar Sanchar</title>
         <!--BOOTSTRAP, CSS-->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
@@ -30,7 +31,7 @@
                                         <label for="username" class="mx-3">Username</label>
                                 </div>
                                 <div class="col-sm-2 mt-sm-2 mt-4">
-                                        <i class="fas fa-dice fa-3x" title="Click to Generate Random Username"></i>
+                                    <button type="button" id="generateUNbut" class="random-but"><i class="fas fa-dice fa-3x" title="Click to Generate Random Username"></i></button>
                                 </div>
                         </div>
                         <div class="row mt-5 d-flex justify-content-around">
@@ -39,7 +40,7 @@
                                     <label for="roomkey" class="mx-3">Room Key</label>
                                 </div>
                                 <div class="col-sm-2 mt-sm-2 mt-4">
-                                    <button  id="generateRKbut"><i class="fas fa-dice fa-3x" title="Click to Generate Random Roomkey"></i></button>
+                                    <button type="button" id="generateRKbut" class="random-but"><i class="fas fa-dice fa-3x" title="Click to Generate Random Roomkey"></i></button>
                                 </div>
                         </div>
                         <div class="row my-3">
