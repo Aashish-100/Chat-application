@@ -2,6 +2,11 @@
 // const moment=require('moment');
 var socket = io();
 
+//import {crypt} from '../utils/encryption.js';
+import {crypt} from './encryption.js';
+import {b64toBlob} from './blob.js';
+
+
 // import { scorePassword, getWordNum, randomUsername } from '../utils/password.js';
 // source: https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases
 // license; UNLICENSED
@@ -7994,7 +7999,7 @@ window.onload = function(){
         // Join Room
         // socket.emit('joinRoom', {usn, rk});
         var exitBtnRoom=document.getElementById("extbutn");
-        var sendmsgbtn=document.getElementById("send-msg");
+        //var sendmsgbtn=document.getElementById("send-msg");
         var emojibtn=document.getElementById("button-emoji");
         var inpmsg=document.getElementById("msg-input");
         var attachfiles=document.getElementById("attach-file");
@@ -8024,7 +8029,139 @@ window.onload = function(){
             navigator.clipboard.writeText(rk);
             alert("Copied!");
         }
+        var keyMatrix;
+        keyMatrix = new Array(3);
+        for(let i=0;i<3;i++)
+        {
+            keyMatrix[i]=new Array(3);
+            for(let j=0;j<3;j++)
+                keyMatrix[i][j]=0;
+        }
+        function getKeyMatrix(key,keyMatrix)
+        {
+            let k = 0;
+            for (let i = 0; i < 3; i++)
+            {
+                for (let j = 0; j < 3; j++)
+                {
+                    keyMatrix[i][j] = (key[k]).charCodeAt(0);
+                    k++;
+                }
+            }
+        }
 
+        var invmatrix = Array(3);
+        for(let i=0;i<3;i++)
+            invmatrix[i] = Array(3).fill(0);
+        var invertible = false;
+        var start=0;
+        while((!invertible)&&((start+9)<=(rk.length)))
+        {
+            var counter = 0;
+            var hckey = rk.slice(start,start+9);
+            console.log("Key selected for hill cipher: "+hckey);
+            getKeyMatrix(hckey, keyMatrix);
+            invertible = checkInvertibility(keyMatrix,counter);
+            start++;
+        }
+        if(!invertible)
+        {
+            hckey="GYBNQKURP";
+            getKeyMatrix(hckey, keyMatrix);
+        }
+        if(invertible)
+        {
+            inverse(keyMatrix);
+        }
+        var det;
+        var inv=false;
+        function checkInvertibility(matrix,counter)
+        {
+
+            //calculating determinant of matrix
+            var d1 = matrix[1][1]*matrix[2][2]-matrix[1][2]*matrix[2][1];
+            var d2 = matrix[1][0]*matrix[2][2]-matrix[1][2]*matrix[2][0];
+            var d3 = matrix[1][0]*matrix[2][1]-matrix[1][1]*matrix[2][0];
+            var a = matrix[0][0];
+            var b = matrix[0][1];
+            var c = matrix[0][2];
+            det = a*d1 - b*d2 + c*d3;
+
+            if(det!=0)
+            {
+                keyMatrix = matrix;
+                return true;
+            }else{
+                if(counter<1)
+                {
+                    matrix[2][2]+=1;
+                    //keyMatrix[2][2]+=1;
+                    counter+=1;
+                    inv = checkInvertibility(matrix,counter);
+                    return inv;
+                }
+                else
+                    return false;
+            }
+
+        }
+
+        function inverse(matrix)
+        {
+            function transpose(A , B) {
+                var i, j;
+                for (i = 0; i < 3; i++)
+                    for (j = 0; j < 3; j++)
+                        B[i][j] = A[j][i];
+            }
+
+            var tmatrix = Array(3);
+
+            for(let i=0;i<3;i++)
+                tmatrix[i] = Array(3).fill(0);
+
+            transpose(matrix, tmatrix);
+
+            var det9 = tmatrix[0][0]*tmatrix[1][1]-tmatrix[0][1]*tmatrix[1][0];
+            var det7 = tmatrix[0][1]*tmatrix[1][2]-tmatrix[0][2]*tmatrix[1][1];
+            var det8 = tmatrix[0][0]*tmatrix[1][2]-tmatrix[0][2]*tmatrix[1][0];
+            var det3 = tmatrix[1][0]*tmatrix[2][1]-tmatrix[1][1]*tmatrix[2][0];
+            var det1 = tmatrix[1][1]*tmatrix[2][2]-tmatrix[1][2]*tmatrix[2][1];
+            var det2 = tmatrix[1][0]*tmatrix[2][2]-tmatrix[1][2]*tmatrix[2][0];
+            var det6 = tmatrix[0][0]*tmatrix[2][1]-tmatrix[0][1]*tmatrix[2][0];
+            var det4 = tmatrix[0][1]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][1];
+            var det5 = tmatrix[0][0]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][0];
+
+            var adj = Array(3); //adjoint matrix
+            for(let i=0;i<3;i++)
+                adj[i] = Array(3).fill(0);
+
+            adj[0][0]=det1;
+            adj[0][1]=-det2;
+            adj[0][2]=det3;
+            adj[1][0]=-det4;
+            adj[1][1]=det5;
+            adj[1][2]=-det6;
+            adj[2][0]=det7;
+            adj[2][1]=-det8;
+            adj[2][2]=det9;
+
+            for(let i=0; i<3; i++)
+            {
+                for(let j=0;j<3;j++)
+                {
+                    invmatrix[i][j]=adj[i][j]/Math.abs(det);
+                }
+            }
+            console.log("Inverse matrix:");
+            for(let i=0; i<3; i++)
+            {
+                for(let j=0;j<3;j++)
+                {
+                    console.log(invmatrix[i][j]);
+                }
+            }
+        }
 
         var file;
         var fileSelected = false;
@@ -8071,7 +8208,20 @@ window.onload = function(){
             {
                 let reader=new FileReader();
                 reader.onload=function(e){
-                    let buffer = new Uint8Array(reader.result);
+                    //let buffer = new Uint8Array(reader.result);
+                    // let buffer = reader.result;
+                    // //buffer=reader.result.replace(/^data:.+;base64,/, '');
+                    // console.log(buffer);
+                    // console.log(buffer.length);
+                    let buffer=reader.result.replace(/^data:.+;base64,/, '');
+                    console.log(buffer);
+                    console.log(buffer.length);
+                    console.log("File type: "+file.type);
+                    buffer = crypt.encryptMessage(buffer, rk, keyMatrix);
+                    console.log("Encrypted file content: "+buffer);
+                    //var encodedData = retrieveB64FromBlob(reader.result);
+                    // console.log("Encoded data: ");
+                    //console.log(encodedData);
                     // let el =document.createElement("div");
                     // el.classList.add("progressdiv");
                     inpmsg.value = "0% sent :- "+file.name;
@@ -8092,12 +8242,14 @@ window.onload = function(){
                         usender:usn,
                         time:time,
                         filename:file.name,
+                        filetype:file.type,
                         total_buffer_size:buffer.length,
                         buffer_size:1024
                     },buffer);
                     //},buffer,inpmsg.querySelector(".progress"));
                 }
-                reader.readAsArrayBuffer(file);
+                //reader.readAsArrayBuffer(file);
+                reader.readAsDataURL(file);
                 inpmsg.readOnly = false;
                 fileSelected=false;
                 msgf.reset();
@@ -8107,7 +8259,9 @@ window.onload = function(){
                 msg = msg.trim();
                 if(msg!=""){
                     //Emit a message to a server
-
+                    
+                    var encryptedmsg = crypt.encryptMessage(msg, rk, keyMatrix);
+                    console.log("Encrypted message: "+encryptedmsg);
                     renderMessage("my",{
                         username: usn,
                         text: msg,
@@ -8122,7 +8276,7 @@ window.onload = function(){
 
                     socket.emit('chat',{
                         username: usn,
-                        text: msg,
+                        text: encryptedmsg,
                         time: time
                     });
                     msgf.reset();
@@ -8157,6 +8311,7 @@ window.onload = function(){
         });
 
         socket.on("chat",function(message){
+            message.text = crypt.decryptMessage(message.text, rk, invmatrix);
             renderMessage("other",message);
         });
 
@@ -8166,21 +8321,27 @@ window.onload = function(){
         //     fileShare={};
         // });
 
+
+        async function url2Blob(url){
+            return await (await fetch(url)).blob()
+        }
+
         var fileShare={};
         socket.on("fs-meta",function(metadata){
             fileShare.metadata=metadata.meta;
             fileShare.transmitted=0;
             fileShare.sender=metadata.senderid;
-            fileShare.buffer=[];
+            fileShare.buffer="";
             socket.emit("fs-start",
             {
                 sender:metadata.senderid
             })
         });
 
-        socket.on("fs-share-r",function(buffer){
-            fileShare.buffer.push(buffer);
-            fileShare.transmitted += buffer.byteLength;
+        socket.on("fs-share-r",async function(buffer){
+            //fileShare.buffer.push(buffer);
+            fileShare.buffer+=buffer;
+            fileShare.transmitted += buffer.length;
             console.log(fileShare.transmitted);
             if(fileShare.transmitted==fileShare.metadata.total_buffer_size){
                 console.log("Receiver received the complete file");
@@ -8203,7 +8364,12 @@ window.onload = function(){
                     text: fileShare.metadata.filename,
                     time: time
                 });
-                saveFile(new Blob(fileShare.buffer), fileShare.metadata.filename);
+                fileShare.buffer=crypt.decryptMessage(fileShare.buffer, rk, invmatrix);
+                fileShare.buffer = "data:"+fileShare.metadata.filetype+";base64,"+fileShare.buffer;
+                let blob = await url2Blob(fileShare.buffer);
+                //const blob = b64toBlob(atob(fileShare.buffer), fileShare.metadata.filetype);
+                //saveFile(new Blob(fileShare.buffer), fileShare.metadata.filename);
+                saveFile(blob, fileShare.metadata.filename);
                 fileShare={}
             }else{
                 socket.emit("fs-start", {
@@ -8237,6 +8403,7 @@ window.onload = function(){
 
         //function shareFile(metadata,buffer,progress_node){
         function shareFile(metadata,buffer){
+
             socket.emit("file-meta",{
                 metadata:metadata
             });
