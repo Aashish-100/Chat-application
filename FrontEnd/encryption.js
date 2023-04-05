@@ -4,7 +4,7 @@
 //https://www.npmjs.com/package/crypto-js
 
 
-export const crypt = (function () {
+const crypt = (function () {
     // Encrypts and decrypts data using CryptoJS in password mode.
 
     return {
@@ -35,7 +35,7 @@ export const crypt = (function () {
         }
     };
 })();
-
+module.exports = {crypt};
 // Javascript code to implement Hill Cipher
 
 // Following function generates the
