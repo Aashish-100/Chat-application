@@ -16128,17 +16128,20 @@ module.exports = function whichTypedArray(value) {
 const zlib = require('zlib');
 
 function compressString(string){
-    const compressedString = zlib.gzipSync(string).toString('base64');
-    //const compressedString = zlib.deflateSync(string).toString('base64');
+    //const compressedString = zlib.gzipSync(string).toString('base64');
+    console.log("Before deflate hi");
+    const compressedString = zlib.deflateSync(string).toString('base64');
+    console.log("After deflate hi");
     //console.log(`Uncompressed string: ${uncompressedString}`);
     console.log(`Compressed string: ${compressedString}`);
     return compressedString;
 }
 
 function decompressString(string){
-    console.log("Compressed string: "+string);
-    //const uncompressedString = zlib.inflateSync(Buffer.from(string, 'base64')).toString();
-    const uncompressedString = zlib.gunzipSync(Buffer.from(string, 'base64')).toString();
+    //console.log("Compressed string: "+string);
+    const uncompressedString = zlib.inflateSync(Buffer.from(string, 'base64'));
+    //const uncompressedString = zlib.gunzipSync(Buffer.from(string, 'base64')).toString();
+    console.log(`Uncompressed string: ${uncompressedString}`);
     return uncompressedString;
     //console.log(`Uncompressed string: ${uncompressedString}`);
 }
@@ -16149,12 +16152,16 @@ module.exports = { compressString, decompressString };
 },{"buffer":10,"zlib":9}],65:[function(require,module,exports){
 // import CryptoJS from 'crypto-js';
 
+
 //const CryptoJS = require('crypto-js');
 //https://www.npmjs.com/package/crypto-js
 
 
+
+
 const crypt = (function () {
     // Encrypts and decrypts data using CryptoJS in password mode.
+
 
     return {
         encryptMessage: function (messageToencrypt = '', secretkey = '', keyMatrix) {
@@ -16174,7 +16181,7 @@ const crypt = (function () {
                 decryptedMessage = HillCipherD(decryptedMessage,invMatrix);
                 console.log("Final message(Data url received)");
                 console.log(decryptedMessage);
-                
+               
                 FinalText = "";
                 return decryptedMessage;
             } catch (err) {
@@ -16186,6 +16193,7 @@ const crypt = (function () {
 })();
 module.exports = {crypt};
 // Javascript code to implement Hill Cipher
+
 
 // Following function generates the
 // key matrix for the key string
@@ -16202,6 +16210,7 @@ module.exports = {crypt};
 //     }
 // }
 
+
 // Following function encrypts the message
 function encrypt(cipherMatrix,keyMatrix,messageVector)
 {
@@ -16212,14 +16221,17 @@ function encrypt(cipherMatrix,keyMatrix,messageVector)
         {
             cipherMatrix[i][j] = 0;
 
+
             for(x = 0; x < 3; x++)
             {
             cipherMatrix[i][j] += keyMatrix[i][x] * messageVector[x][j];
             }
 
+
         }
     }
 }
+
 
 function decrypt(cipherMatrix,invMatrix,resultVector)
 {
@@ -16229,6 +16241,7 @@ function decrypt(cipherMatrix,invMatrix,resultVector)
         for (j = 0; j < 1; j++)
         {
             resultVector[i][j] = 0;
+
 
             for (x = 0; x < 3; x++)
             {
@@ -16240,19 +16253,23 @@ function decrypt(cipherMatrix,invMatrix,resultVector)
     }
 }
 
+
 var ciphertext = "";
 var FinalText = "";
 // var invmatrix = Array(3);
 //     for(let i=0;i<3;i++)
 //         invmatrix[i] = Array(3).fill(0);
 
+
 // Function to implement Hill Cipher
 function CipherGeneration(message, keyMatrix)
 {
 
+
     //****************************
     //optimize this *keymatrix is being calculated everytime though the key is same*
     //****************************
+
 
     let messageVector = new Array(3);
     for(let i=0;i<3;i++)
@@ -16260,7 +16277,8 @@ function CipherGeneration(message, keyMatrix)
         messageVector[i]=new Array(1);
         messageVector[i][0]=0;
     }
-    
+   
+
 
     // Generate vector for the message
     //console.log("Message Vector: ");
@@ -16273,12 +16291,14 @@ function CipherGeneration(message, keyMatrix)
         //console.log(messageVector[i][0])
     }
 
+
     let cipherMatrix = new Array(3);
     for(let i=0;i<3;i++)
     {
     cipherMatrix[i]=new Array(1);
     cipherMatrix[i][0]=0;
     }
+
 
     // Following function generates
     // the encrypted vector
@@ -16289,14 +16309,18 @@ function CipherGeneration(message, keyMatrix)
         for(var j=0;j<1;j++)
         {
             //console.log(cipherMatrix[i][j]);
-            ciphertext+=cipherMatrix[i][j].toString().padStart(11,'0');
+            //ciphertext+=cipherMatrix[i][j].toString().padStart(11,'0');
+            ciphertext+=cipherMatrix[i][j].toString()+"+";
         }
     }
 
+
 }
+
 
 function DecryptedText(cipherMatrix, invMatrix)
 {
+
 
     let resultVector = new Array(3);
     for(let i=0;i<3;i++)
@@ -16305,14 +16329,16 @@ function DecryptedText(cipherMatrix, invMatrix)
         resultVector[i][0]=0;
     }
 
+
     //console.log("Inverse matrix:");
-    for(let i=0; i<3; i++)
-    {
-        for(let j=0;j<3;j++)
-        {
-            //console.log(invMatrix[i][j]);
-        }
-    }
+    // for(let i=0; i<3; i++)
+    // {
+    //     for(let j=0;j<3;j++)
+    //     {
+    //         //console.log(invMatrix[i][j]);
+    //     }
+    // }
+
 
     decrypt(cipherMatrix, invMatrix, resultVector);
     // console.log("Result Matrix: ");
@@ -16323,6 +16349,7 @@ function DecryptedText(cipherMatrix, invMatrix)
     //         console.log(resultVector[i][j]);
     //     }
     // }
+
 
     let FinalBlockText = "";
     for(let i=0; i<3; i++)
@@ -16338,10 +16365,12 @@ function DecryptedText(cipherMatrix, invMatrix)
     //console.log("Final text from DecryptedText: "+FinalText);
 }
 
+
 var blocks;
 //var keyMatrix;
 function HillCipherE(message, keyMatrix)
 {
+
 
     const msglen = message.length;
     blocks = msglen/3;
@@ -16373,6 +16402,7 @@ function HillCipherE(message, keyMatrix)
     // }
     // inverse(keyMatrix); //calculate the inverse
 
+
     for(let i=0;i<blocks;i++)
     {
         var msgblock = message.slice(i*3,i*3+3);
@@ -16380,7 +16410,7 @@ function HillCipherE(message, keyMatrix)
         CipherGeneration(msgblock, keyMatrix);
     }
     //console.log("Cipher: "+ciphertext);
-    return ciphertext;
+    return ciphertext.slice(0,ciphertext.length-1);
 }
 function HillCipherD(cipher, invMatrix)
 {
@@ -16402,6 +16432,7 @@ function HillCipherD(cipher, invMatrix)
     // }
     // inverse(keyMatrix);
 
+
     let ind=0;
     let cipherMatrix = new Array(3);
     for(let i=0;i<3;i++)
@@ -16411,10 +16442,12 @@ function HillCipherD(cipher, invMatrix)
     }
     let count = 0;
     //console.log("Cipher Matrix: ");
-    while(ind+11<=cipher.length)
+
+
+    const cipherArray = cipher.split("+");
+    for(let i=0;i<cipherArray.length;i++)
     {
-        let s = cipher.slice(ind,ind+11);
-        s = Number(s);
+        let s = Number(cipherArray[i]);
         if(count<3)
         {
             cipherMatrix[count][0]=s;
@@ -16427,125 +16460,53 @@ function HillCipherD(cipher, invMatrix)
             }
         }
         count++;
-        ind+=11;
-
     }
+
+
+
+
+    // while(ind+11<=cipher.length)
+    // {
+    //     let s = cipher.slice(ind,ind+11);
+    //     s = Number(s);
+    //     if(count<3)
+    //     {
+    //         cipherMatrix[count][0]=s;
+    //         //console.log(cipherMatrix[count][0]);
+    //         if(count==2)
+    //         {
+    //             DecryptedText(cipherMatrix, invMatrix);
+    //             //console.log("Cipher Matrix: ");
+    //             count=-1;
+    //         }
+    //     }
+    //     count++;
+    //     ind+=11;
+
+
+    // }
     // for(let i=0;i<blocks;i++)
     // {
     //     var cblock = cipher.slice(i*3,i*3+3);
     //     //console.log(msgblock);
     //     DecryptedText(cblock);
     // }
-    
+   
     //console.log("Final text: "+FinalText);
     return FinalText;
 }
-// var det;
-// var inv=false;
-// function checkInvertibility(matrix,counter)
-// {
 
-//     //calculating determinant of matrix
-//     var d1 = matrix[1][1]*matrix[2][2]-matrix[1][2]*matrix[2][1];
-//     var d2 = matrix[1][0]*matrix[2][2]-matrix[1][2]*matrix[2][0];
-//     var d3 = matrix[1][0]*matrix[2][1]-matrix[1][1]*matrix[2][0];
-//     var a = matrix[0][0];
-//     var b = matrix[0][1];
-//     var c = matrix[0][2];
-//     det = a*d1 - b*d2 + c*d3;
-
-//     if(det!=0)
-//     {
-//         keyMatrix = matrix;
-//         return true;
-//     }else{
-//         if(counter<1)
-//         {
-//             matrix[2][2]+=1;
-//             //keyMatrix[2][2]+=1;
-//             counter+=1;
-//             inv = checkInvertibility(matrix,counter);
-//             return inv;
-//         }
-//         else
-//             return false;
-//     }
-
-// }
-
-// function inverse(matrix)
-// {
-//     function transpose(A , B) {
-//         var i, j;
-//         for (i = 0; i < 3; i++)
-//             for (j = 0; j < 3; j++)
-//                 B[i][j] = A[j][i];
-//     }
-
-//     var tmatrix = Array(3);
-
-//     for(let i=0;i<3;i++)
-//         tmatrix[i] = Array(3).fill(0);
-
-//     transpose(matrix, tmatrix);
-
-//     var det9 = tmatrix[0][0]*tmatrix[1][1]-tmatrix[0][1]*tmatrix[1][0];
-//     var det7 = tmatrix[0][1]*tmatrix[1][2]-tmatrix[0][2]*tmatrix[1][1];
-//     var det8 = tmatrix[0][0]*tmatrix[1][2]-tmatrix[0][2]*tmatrix[1][0];
-//     var det3 = tmatrix[1][0]*tmatrix[2][1]-tmatrix[1][1]*tmatrix[2][0];
-//     var det1 = tmatrix[1][1]*tmatrix[2][2]-tmatrix[1][2]*tmatrix[2][1];
-//     var det2 = tmatrix[1][0]*tmatrix[2][2]-tmatrix[1][2]*tmatrix[2][0];
-//     var det6 = tmatrix[0][0]*tmatrix[2][1]-tmatrix[0][1]*tmatrix[2][0];
-//     var det4 = tmatrix[0][1]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][1];
-//     var det5 = tmatrix[0][0]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][0];
-
-//     var adj = Array(3); //adjoint matrix
-//     for(let i=0;i<3;i++)
-//         adj[i] = Array(3).fill(0);
-
-//     adj[0][0]=det1;
-//     adj[0][1]=-det2;
-//     adj[0][2]=det3;
-//     adj[1][0]=-det4;
-//     adj[1][1]=det5;
-//     adj[1][2]=-det6;
-//     adj[2][0]=det7;
-//     adj[2][1]=-det8;
-//     adj[2][2]=det9;
-
-//     for(let i=0; i<3; i++)
-//     {
-//         for(let j=0;j<3;j++)
-//         {
-//             invmatrix[i][j]=adj[i][j]/Math.abs(det);
-//         }
-//     }
-//     console.log("Inverse matrix:");
-//     for(let i=0; i<3; i++)
-//     {
-//         for(let j=0;j<3;j++)
-//         {
-//             console.log(invmatrix[i][j]);
-//         }
-//     }
-// }
-
-// // var generatedCipherText = HillCipherE("Aatmanirbhar Sanchar 6th Feb","OptRisottoPrimarilyMunchkinUcoiledPayday_");
-// // console.log("Cipher Text: "+generatedCipherText);
-// // var generatedFinalText = HillCipherD(generatedCipherText);
-// // console.log("Final Text: "+generatedFinalText);
-// // 😀
 },{}],66:[function(require,module,exports){
+(function (Buffer){(function (){
 // const { text } = require("express");
 // const moment=require('moment');
 var socket = io();
 
-//import {crypt} from '../utils/encryption.js';
-//import {crypt} from './encryption.js';
-const {crypt} = require('./encryption.js');
-//import {b64toBlob} from './blob.js';
 const { compressString, decompressString } = require('./comp.js');
-
+//import {crypt} from '../utils/encryption.js';
+const {crypt} = require('./encryption.js');
+//const { compressString, decompressString } = require('./comp.js');
+//import {b64toBlob} from './blob.js';
 window.compressString = compressString;
 window.decompressString = decompressString;
 window.encryptMessage = crypt.encryptMessage;
@@ -16554,6 +16515,7 @@ window.decryptMessage = crypt.decryptMessage;
 // import { scorePassword, getWordNum, randomUsername } from '../utils/password.js';
 // source: https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases
 // license; UNLICENSED
+
 const eff = {
     11111: "abacus",
     11112: "abdomen",
@@ -24339,12 +24301,14 @@ function scorePassword(pass) {
     if (! pass) // returns 0 if pass empty
         return score;
 
+
     // award every unique letter until 5 repetitions
     var letters = Object();
     for (var i = 0; i < pass.length; i++) {
         letters[pass[i]] = (letters[pass[i]] || 0) + 1;
         score += 5.0 / letters[pass[i]];
     }
+
 
     // bonus points for mixing it up
     var variations = {
@@ -24354,35 +24318,42 @@ function scorePassword(pass) {
         nonWords: /\W/.test(pass)
     }
 
+
     var variationCount = 0;
     for (var check in variations) {
         variationCount += (variations[check] === true) ? 1 : 0;
     }
     score += (variationCount - 1) * 10;
 
+
     return parseInt(score);
 }
 
+
 function secureRandom(count) {
     // generate a cryptographically secure integer
-    
+   
     var cryptoObj = window.crypto || window.msCrypto
     var rand = new Uint32Array(1)
     var skip = 0x7fffffff - 0x7fffffff % count
     var result
+
 
     if (((count - 1) & count) === 0) {
         cryptoObj.getRandomValues(rand)
         return rand[0] & (count - 1)
     }
 
+
     do {
         cryptoObj.getRandomValues(rand)
         result = rand[0] & 0x7fffffff
     } while (result >= skip)
 
+
     return result % count
 }
+
 
 function getWordNum(length) { // get the random words from the dice ware dict
     var wordslist = []
@@ -24398,6 +24369,7 @@ function getWordNum(length) { // get the random words from the dice ware dict
     return wordslist.join('')
 }
 
+
 function randomUsername(length) { // get the random words from the dice ware dict
     var wordslist = []
     for (var i = 0; i < length; i++) {
@@ -24411,6 +24383,7 @@ function randomUsername(length) { // get the random words from the dice ware dic
     return wordslist.join('')
 }
 
+
 function randomUID(length) {
     var UIDlist = [];
     for (var i = 0; i < length; i++) {
@@ -24418,32 +24391,45 @@ function randomUID(length) {
     }
     return UIDlist.join('')
 }
-    
+
+
+
 
 // import  {renderMessage}  from '../utils/message';
+
 
 //Message from server
 // socket.on('message',message => {
 //     console.log(message);
 //     outputMessage(message)
 
+
 //     //Scroll down
 
+
 // })
+
 
 // function outputMessage(message){
 //     const div=document.createElement('div');
 //     div.classList.add('my-message', 'message');
 //     div.innerHTML= `<div><div class="name">${message.usrname} <span class="msgtime">${message.time}</span></div><div class="text">   ${message.text} </div></div>`;
 //     document.querySelector('.messages').appendChild(div);
-// }   
+// }  
+
+
 
 
 // // Javascript implementation of chat application
 
 
+
+
 // //Checking input vars
 // var frmres=document.getElementById("usrinp");
+
+
+
 
 
 
@@ -24452,7 +24438,7 @@ window.onload = function(){
     // socket.on('message',message => {
     //     console.log(message);
     //     outputMessage(message)
-    
+   
     //     //Scroll down
     msgdiv=document.querySelector('.chatscroll');
     msgdiv.scrollTop=msgdiv.scrollHeight-msgdiv.clientHeight;
@@ -24550,7 +24536,7 @@ window.onload = function(){
         var chatscreen = document.getElementById("chatscrn");
         var roomkeydisplay = document.getElementById("display-rk");
         var msgf=document.getElementById("msgform");
-        
+       
         joinchat.classList.remove("active");
         chatscreen.classList.add("active");
         var cred={usnm: usn, rmk: rk};
@@ -24563,7 +24549,7 @@ window.onload = function(){
         })
         blurtext.addEventListener("mouseout", function(){
             blurtext.classList.add("blurry-text");
-        
+       
         })
         // Adding the copy to clipboard functionality
         var copybtn=document.getElementById("cpbtn");
@@ -24594,6 +24580,7 @@ window.onload = function(){
             }
         }
 
+
         var invmatrix = Array(3);
         for(let i=0;i<3;i++)
             invmatrix[i] = Array(3).fill(0);
@@ -24622,6 +24609,7 @@ window.onload = function(){
         function checkInvertibility(matrix,counter)
         {
 
+
             //calculating determinant of matrix
             var d1 = matrix[1][1]*matrix[2][2]-matrix[1][2]*matrix[2][1];
             var d2 = matrix[1][0]*matrix[2][2]-matrix[1][2]*matrix[2][0];
@@ -24630,6 +24618,7 @@ window.onload = function(){
             var b = matrix[0][1];
             var c = matrix[0][2];
             det = a*d1 - b*d2 + c*d3;
+
 
             if(det!=0)
             {
@@ -24648,7 +24637,9 @@ window.onload = function(){
                     return false;
             }
 
+
         }
+
 
         function inverse(matrix)
         {
@@ -24659,12 +24650,16 @@ window.onload = function(){
                         B[i][j] = A[j][i];
             }
 
+
             var tmatrix = Array(3);
+
 
             for(let i=0;i<3;i++)
                 tmatrix[i] = Array(3).fill(0);
 
+
             transpose(matrix, tmatrix);
+
 
             var det9 = tmatrix[0][0]*tmatrix[1][1]-tmatrix[0][1]*tmatrix[1][0];
             var det7 = tmatrix[0][1]*tmatrix[1][2]-tmatrix[0][2]*tmatrix[1][1];
@@ -24676,9 +24671,11 @@ window.onload = function(){
             var det4 = tmatrix[0][1]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][1];
             var det5 = tmatrix[0][0]*tmatrix[2][2]-tmatrix[0][2]*tmatrix[2][0];
 
+
             var adj = Array(3); //adjoint matrix
             for(let i=0;i<3;i++)
                 adj[i] = Array(3).fill(0);
+
 
             adj[0][0]=det1;
             adj[0][1]=-det2;
@@ -24689,6 +24686,7 @@ window.onload = function(){
             adj[2][0]=det7;
             adj[2][1]=-det8;
             adj[2][2]=det9;
+
 
             for(let i=0; i<3; i++)
             {
@@ -24706,6 +24704,7 @@ window.onload = function(){
                 }
             }
         }
+
 
         var file;
         var fileSelected = false;
@@ -24734,8 +24733,8 @@ window.onload = function(){
             // }
             // reader.readAsArrayBuffer(file);
         });
-    
-        //Reading message from the user and displaying it 
+   
+        //Reading message from the user and displaying it
         msgf.addEventListener('submit', function(e){
             e.preventDefault();
             var getval=new Date;
@@ -24748,25 +24747,24 @@ window.onload = function(){
                 mins="0"+mins;
             var time=hrs + ":" + mins;
 
+
             if(fileSelected)
             {
                 let reader=new FileReader();
                 reader.onload=function(e){
-                    // let buffer = new Uint8Array(reader.result);
-                    // buffer = compressString(buffer);
-                    //buffer = zlib.deflateSync(fileData);
-                    // let buffer = reader.result;
+                    //let buffer = new Uint8Array(reader.result);
+                    let buffer = Buffer.from(new Uint8Array(reader.result));
                     // //buffer=reader.result.replace(/^data:.+;base64,/, '');
-                    // console.log(buffer);
-                    // console.log(buffer.length);
-                    let buffer=reader.result.replace(/^data:.+;base64,/, '');
+                    console.log("Type of buffer: "+typeof buffer);
                     console.log(buffer);
-                    console.log(buffer.length);
-                    console.log("File type: "+file.type);
-                    //buffer = crypt.encryptMessage(buffer, rk, keyMatrix);
-                    buffer = encryptMessage(buffer, rk, keyMatrix);
-                    console.log("Encrypted file content: "+buffer);
                     buffer = compressString(buffer);
+                    // console.log(buffer.length);
+                    //let buffer=reader.result.replace(/^data:.+;base64,/, '');
+                    //console.log(buffer);
+                    //console.log(buffer.length);
+                    console.log("File type: "+file.type);
+                    buffer = crypt.encryptMessage(buffer, rk, keyMatrix);
+                    console.log("Encrypted file content: "+buffer);
                     //var encodedData = retrieveB64FromBlob(reader.result);
                     // console.log("Encoded data: ");
                     //console.log(encodedData);
@@ -24778,6 +24776,7 @@ window.onload = function(){
                     // <div class="filename">${file.name}</div>
                     // `;
 
+
                     //shareFile(type,metadata,buffer,progressnode)
                     // var msg=file.name;
                     // renderMessage("my",{
@@ -24785,6 +24784,7 @@ window.onload = function(){
                     //     text: msg,
                     //     time: time
                     // });
+
 
                     shareFile({
                         usender:usn,
@@ -24796,8 +24796,8 @@ window.onload = function(){
                     },buffer);
                     //},buffer,inpmsg.querySelector(".progress"));
                 }
-                //reader.readAsArrayBuffer(file);
-                reader.readAsDataURL(file);
+                reader.readAsArrayBuffer(file);
+                //reader.readAsDataURL(file);
                 inpmsg.readOnly = false;
                 fileSelected=false;
                 msgf.reset();
@@ -24807,9 +24807,8 @@ window.onload = function(){
                 msg = msg.trim();
                 if(msg!=""){
                     //Emit a message to a server
-                    
-                    //var encryptedmsg = crypt.encryptMessage(msg, rk, keyMatrix);
-                    var encryptedmsg = encryptMessage(msg, rk, keyMatrix);
+                   
+                    var encryptedmsg = crypt.encryptMessage(msg, rk, keyMatrix);
                     console.log("Encrypted message: "+encryptedmsg);
                     renderMessage("my",{
                         username: usn,
@@ -24817,11 +24816,13 @@ window.onload = function(){
                         time: time
                     });
 
+
                     // shareFile({
                     //     filename:file.name,
                     //     total_buffer_size:buffer.length,
                     //     buffer_size:1024
                     // },buffer,el.querySelector(".progress"));
+
 
                     socket.emit('chat',{
                         username: usn,
@@ -24832,6 +24833,7 @@ window.onload = function(){
                     // e.target.elements.
                 }
             }
+
 
         });
         function renderMessage(type,message){
@@ -24846,6 +24848,7 @@ window.onload = function(){
                 div.innerHTML= `<div><div class="name">${message.username} <span class="msgtime">${message.time}</span></div><div class="text">   ${message.text} </div></div>`;
                 document.querySelector('.messages').appendChild(div);
 
+
             } else if(type=="update"){
                 const div=document.createElement('div');
                 div.classList.add('update');
@@ -24855,15 +24858,17 @@ window.onload = function(){
             }
         }
 
+
         socket.on('update',function(update){
             renderMessage("update",update)
         });
 
+
         socket.on("chat",function(message){
-            //message.text = crypt.decryptMessage(message.text, rk, invmatrix);
-            message.text = decryptMessage(message.text, rk, invmatrix);
+            message.text = crypt.decryptMessage(message.text, rk, invmatrix);
             renderMessage("other",message);
         });
+
 
         // socket.on("fs-show",function(message){
         //     renderMessage("other",message);
@@ -24872,9 +24877,12 @@ window.onload = function(){
         // });
 
 
-        async function url2Blob(url){
-            return await (await fetch(url)).blob()
-        }
+
+
+        // async function url2Blob(url){
+        //     return await (await fetch(url)).blob()
+        // }
+
 
         var fileShare={};
         socket.on("fs-meta",function(metadata){
@@ -24887,6 +24895,7 @@ window.onload = function(){
                 sender:metadata.senderid
             })
         });
+
 
         socket.on("fs-share-r",async function(buffer){
             //fileShare.buffer.push(buffer);
@@ -24914,12 +24923,11 @@ window.onload = function(){
                     text: fileShare.metadata.filename,
                     time: time
                 });
-                fileShare.buffer = decompressString(fileShare.buffer);
-                //fileShare.buffer=crypt.decryptMessage(fileShare.buffer, rk, invmatrix);
-                fileShare.buffer=decryptMessage(fileShare.buffer, rk, invmatrix);
-                //fileShare.buffer = decompressString(fileShare.buffer);
-                fileShare.buffer = "data:"+fileShare.metadata.filetype+";base64,"+fileShare.buffer;
-                let blob = await url2Blob(fileShare.buffer);
+                fileShare.buffer=crypt.decryptMessage(fileShare.buffer, rk, invmatrix);
+                fileShare.buffer=decompressString(fileShare.buffer);
+                let blob = new Blob([fileShare.buffer],{type:fileShare.metadata.filetype});
+                //fileShare.buffer = "data:"+fileShare.metadata.filetype+";base64,"+fileShare.buffer;
+                //let blob = await url2Blob(fileShare.buffer);
                 //const blob = b64toBlob(atob(fileShare.buffer), fileShare.metadata.filetype);
                 //saveFile(new Blob(fileShare.buffer), fileShare.metadata.filename);
                 saveFile(blob, fileShare.metadata.filename);
@@ -24932,10 +24940,13 @@ window.onload = function(){
         });
 
 
+
+
         exitBtnRoom.addEventListener('click',function(){
             socket.emit('exituser',usn);
             window.location.href=window.location.href;
         });
+
 
         function saveFile(blob, filename) {
             if (window.navigator.msSaveOrOpenBlob) {
@@ -24954,8 +24965,10 @@ window.onload = function(){
             }
           }
 
+
         //function shareFile(metadata,buffer,progress_node){
         function shareFile(metadata,buffer){
+
 
             socket.emit("file-meta",{
                 metadata:metadata
@@ -24988,5 +25001,5 @@ window.onload = function(){
     });
 }
 
-
-},{"./comp.js":64,"./encryption.js":65}]},{},[66]);
+}).call(this)}).call(this,require("buffer").Buffer)
+},{"./comp.js":64,"./encryption.js":65,"buffer":10}]},{},[66]);
