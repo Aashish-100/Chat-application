@@ -2,9 +2,9 @@ const zlib = require('zlib');
 
 function compressString(string){
     //const compressedString = zlib.gzipSync(string).toString('base64');
-    console.log("Before deflate hi");
+    //console.log("Before deflate hi");
     const compressedString = zlib.deflateSync(string).toString('base64');
-    console.log("After deflate hi");
+    //console.log("After deflate hi");
     //console.log(`Uncompressed string: ${uncompressedString}`);
     console.log(`Compressed string: ${compressedString}`);
     return compressedString;

@@ -27,8 +27,8 @@ const crypt = (function () {
                 var decryptedMessage = decryptedBytes.toString(CryptoJS.enc.Utf8);
                 //console.log("After AES decryption: "+decryptedMessage);
                 decryptedMessage = HillCipherD(decryptedMessage,invMatrix);
-                console.log("Final message(Data url received)");
-                console.log(decryptedMessage);
+                //console.log("Final message(Data url received)");
+                //console.log(decryptedMessage);
                
                 FinalText = "";
                 return decryptedMessage;
