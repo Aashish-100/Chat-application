@@ -24792,7 +24792,7 @@ window.onload = function(){
                         filename:file.name,
                         filetype:file.type,
                         total_buffer_size:buffer.length,
-                        buffer_size:102400
+                        buffer_size:10240
                     },buffer);
                     //},buffer,inpmsg.querySelector(".progress"));
                 }
