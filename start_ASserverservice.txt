@@ -1,0 +1,13 @@
+Unit]
+Description=Start Node JS server on machine startup
+After=network.target
+Requires=network.target
+
+[Service]
+User=hpc4
+ExecStartPre=/bin/sleep 60
+ExecStart=/home/hpc4/start_ASserver.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
