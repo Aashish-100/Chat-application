@@ -16129,9 +16129,9 @@ const zlib = require('zlib');
 
 function compressString(string){
     //const compressedString = zlib.gzipSync(string).toString('base64');
-    //console.log("Before deflate hi");
+    console.log("Before deflate hi");
     const compressedString = zlib.deflateSync(string).toString('base64');
-    //console.log("After deflate hi");
+    console.log("After deflate hi");
     //console.log(`Uncompressed string: ${uncompressedString}`);
     console.log(`Compressed string: ${compressedString}`);
     return compressedString;
@@ -16179,8 +16179,8 @@ const crypt = (function () {
                 var decryptedMessage = decryptedBytes.toString(CryptoJS.enc.Utf8);
                 //console.log("After AES decryption: "+decryptedMessage);
                 decryptedMessage = HillCipherD(decryptedMessage,invMatrix);
-                //console.log("Final message(Data url received)");
-                //console.log(decryptedMessage);
+                console.log("Final message(Data url received)");
+                console.log(decryptedMessage);
                
                 FinalText = "";
                 return decryptedMessage;
@@ -24433,7 +24433,7 @@ function randomUID(length) {
 
 
 
-var usn,rk,rusn="",rrk="",msgdiv,files=[],filec=0;
+var usn,rk,rusn="",rrk="",msgdiv;
 window.onload = function(){
     // socket.on('message',message => {
     //     console.log(message);
@@ -24747,6 +24747,7 @@ window.onload = function(){
                 mins="0"+mins;
             var time=hrs + ":" + mins;
 
+
             if(fileSelected)
             {
                 let reader=new FileReader();
@@ -24754,8 +24755,8 @@ window.onload = function(){
                     //let buffer = new Uint8Array(reader.result);
                     let buffer = Buffer.from(new Uint8Array(reader.result));
                     // //buffer=reader.result.replace(/^data:.+;base64,/, '');
-                    //console.log("Type of buffer: "+typeof buffer);
-                    //console.log(buffer);
+                    console.log("Type of buffer: "+typeof buffer);
+                    console.log(buffer);
                     buffer = compressString(buffer);
                     // console.log(buffer.length);
                     //let buffer=reader.result.replace(/^data:.+;base64,/, '');
@@ -24791,7 +24792,7 @@ window.onload = function(){
                         filename:file.name,
                         filetype:file.type,
                         total_buffer_size:buffer.length,
-                        buffer_size:102400
+                        buffer_size:1024
                     },buffer);
                     //},buffer,inpmsg.querySelector(".progress"));
                 }
@@ -24885,27 +24886,23 @@ window.onload = function(){
 
         var fileShare={};
         socket.on("fs-meta",function(metadata){
-            files[filec]={};
-            files[filec].filenum=filec;
-            files[filec].metadata=metadata.meta;
-            files[filec].transmitted=0;
-            files[filec].sender=metadata.senderid;
-            files[filec].buffer="";
-            filec++;
+            fileShare.metadata=metadata.meta;
+            fileShare.transmitted=0;
+            fileShare.sender=metadata.senderid;
+            fileShare.buffer="";
             socket.emit("fs-start",
             {
-                sender:metadata.senderid,
-                filenumber:filec-1
+                sender:metadata.senderid
             })
         });
 
 
-        socket.on("fs-share-r",async function(filedata){
+        socket.on("fs-share-r",async function(buffer){
             //fileShare.buffer.push(buffer);
-            files[filedata.filenum].buffer+=filedata.bufferchunk;
-            files[filedata.filenum].transmitted += filedata.bufferchunk.length;
-            console.log(files[filedata.filenum].transmitted);
-            if(files[filedata.filenum].transmitted==files[filedata.filenum].metadata.total_buffer_size){
+            fileShare.buffer+=buffer;
+            fileShare.transmitted += buffer.length;
+            console.log(fileShare.transmitted);
+            if(fileShare.transmitted==fileShare.metadata.total_buffer_size){
                 console.log("Receiver received the complete file");
                 var getval=new Date;
                 var hrs=getval.getHours();
@@ -24922,26 +24919,22 @@ window.onload = function(){
                 // }
                 renderMessage("other",
                 {
-                    username: files[filedata.filenum].metadata.usender,
-                    text: files[filedata.filenum].metadata.filename,
+                    username: fileShare.metadata.usender,
+                    text: fileShare.metadata.filename,
                     time: time
                 });
-                let compbuffer="";//complete buffer
-                
-                compbuffer=crypt.decryptMessage(files[filedata.filenum].buffer, rk, invmatrix);
-                compbuffer=decompressString(compbuffer);
-                let blob = new Blob([compbuffer],{type:files[filedata.filenum].metadata.filetype});
+                fileShare.buffer=crypt.decryptMessage(fileShare.buffer, rk, invmatrix);
+                fileShare.buffer=decompressString(fileShare.buffer);
+                let blob = new Blob([fileShare.buffer],{type:fileShare.metadata.filetype});
                 //fileShare.buffer = "data:"+fileShare.metadata.filetype+";base64,"+fileShare.buffer;
                 //let blob = await url2Blob(fileShare.buffer);
                 //const blob = b64toBlob(atob(fileShare.buffer), fileShare.metadata.filetype);
                 //saveFile(new Blob(fileShare.buffer), fileShare.metadata.filename);
-                saveFile(blob, files[filedata.filenum].metadata.filename);
-                //fileShare={}
+                saveFile(blob, fileShare.metadata.filename);
+                fileShare={}
             }else{
-                socket.emit("fs-start",
-                {
-                    sender:files[filedata.filenum].sender,
-                    filenumber:filedata.filenum
+                socket.emit("fs-start", {
+                    sender:fileShare.sender
                 })
             }
         });
@@ -24980,7 +24973,7 @@ window.onload = function(){
             socket.emit("file-meta",{
                 metadata:metadata
             });
-            socket.on("fs-share-s",function(data){
+            socket.on("fs-share-s",function(receiver){
                 let chunk=buffer.slice(0,metadata.buffer_size);
                 buffer=buffer.slice(metadata.buffer_size,buffer.length);
                 //progress_node.innerText=Math.trunc((metadata.total_buffer_size-buffer.length)/(metadata.total_buffer_size)*100+"%");
@@ -24999,8 +24992,7 @@ window.onload = function(){
                         });
                     }
                     socket.emit("file-raw",{
-                        receiver:data.receiverid,
-                        file:data.filenumber,
+                        receiver:receiver.receiverid,
                         buffer:chunk
                     });
                 }

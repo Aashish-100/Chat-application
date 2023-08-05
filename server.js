@@ -144,34 +144,34 @@ io.on('connection', socket=> {
         });
     });
 
-    // socket.on("fs-start", function(data){
-    //     // const getuser=getCurrentUser(socket.id);
-    //     socket.to(data.sender).emit("fs-share-s",
-    //     {
-    //         receiverid:socket.id
-    //     });
-    // });
     socket.on("fs-start", function(data){
         // const getuser=getCurrentUser(socket.id);
         socket.to(data.sender).emit("fs-share-s",
         {
-            receiverid:socket.id,
-            filenumber:data.filenumber
+            receiverid:socket.id
         });
     });
-    
-    // socket.on("file-raw", function(data){
-    //     const getuser=getCurrentUser(socket.id);
-    //     socket.broadcast.to(getuser.room).emit("fs-share-r",data.buffer);
+    // socket.on("fs-start", function(data){
+    //     // const getuser=getCurrentUser(socket.id);
+    //     socket.to(data.sender).emit("fs-share-s",
+    //     {
+    //         receiverid:socket.id,
+    //         filenumber:data.filenumber
+    //     });
     // });
+    
     socket.on("file-raw", function(data){
         const getuser=getCurrentUser(socket.id);
-        //socket.broadcast.to(getuser.room).emit("fs-share-r",data.buffer);
-        socket.to(data.receiver).emit("fs-share-r",{
-            bufferchunk:data.buffer,
-            filenum:data.file
-        });
+        socket.broadcast.to(getuser.room).emit("fs-share-r",data.buffer);
     });
+    // socket.on("file-raw", function(data){
+    //     const getuser=getCurrentUser(socket.id);
+    //     //socket.broadcast.to(getuser.room).emit("fs-share-r",data.buffer);
+    //     socket.to(data.receiver).emit("fs-share-r",{
+    //         bufferchunk:data.buffer,
+    //         filenum:data.file
+    //     });
+    // });
 
     // socket.on("fs-rcomplete", function(data){
     //     const getuser=getCurrentUser(socket.id);

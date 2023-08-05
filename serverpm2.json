@@ -1,0 +1,11 @@
+{
+    "apps":[
+        {
+            "name":"Aatmanirbhar-Sanchar",
+            "script":"./server.js",
+            "watch":true,
+            "ignore_watch":["node_modules"],
+            "exce_mode":"fork"
+        }
+    ]
+}
